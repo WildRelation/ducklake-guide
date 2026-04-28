@@ -260,6 +260,58 @@ con.execute("""
 
 ---
 
+## Giving a team member access to the SSH tunnel (cbhcloud)
+
+On cbhcloud, SSH tunnel access is restricted to the **owner** of the deployment. Sharing a deployment via "Share with team" gives the team member visibility in the dashboard but does not grant SSH tunnel access.
+
+To give a team member SSH tunnel access:
+
+### Step 1 — Team member creates a new SSH key
+
+The new key must **not** already be registered on the team member's own cbhcloud profile — cbhcloud maps SSH keys to users, and a key registered on two profiles causes a conflict.
+
+**Linux / macOS:**
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_shared
+```
+
+**Windows (PowerShell):**
+```powershell
+ssh-keygen -t ed25519 -f "C:\Users\<username>\.ssh\id_ed25519_shared"
+```
+
+### Step 2 — Team member sends you the public key
+
+**Linux / macOS:**
+```bash
+cat ~/.ssh/id_ed25519_shared.pub
+```
+
+**Windows (PowerShell):**
+```powershell
+cat "C:\Users\<username>\.ssh\id_ed25519_shared.pub"
+```
+
+### Step 3 — Owner adds the key to their own cbhcloud profile
+
+Go to your cbhcloud profile settings and add the team member's public key there.
+
+### Step 4 — Team member opens the tunnel using the new key
+
+**Linux / macOS:**
+```bash
+ssh -i ~/.ssh/id_ed25519_shared -L 5432:localhost:5432 <your-postgres-deployment>@deploy.cloud.cbh.kth.se -N
+```
+
+**Windows (PowerShell):**
+```powershell
+ssh -i "C:\Users\<username>\.ssh\id_ed25519_shared" -L 5432:localhost:5432 <your-postgres-deployment>@deploy.cloud.cbh.kth.se -N
+```
+
+The team member can then run the Python script as normal — `PG_HOST` stays `localhost`.
+
+---
+
 ## Key Notes
 
 **Why `localhost` as the PostgreSQL host?**
